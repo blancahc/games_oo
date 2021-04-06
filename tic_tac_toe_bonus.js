@@ -92,8 +92,16 @@ class Board {
 class Player {
   constructor(marker) {
     this.marker = marker;
+    this.score = 0;
   }
 
+  getScore() {
+    return this.score;
+  }
+
+  incrementScore() {
+    this.score += 1;
+  }
   getMarker() {
     return this.marker;
   }
@@ -130,6 +138,10 @@ class TTTGame {
     [ "3", "5", "7" ],            // diagonal: bottom-left to top-right
   ];
 
+  static MATCH_GOAL = 3;
+
+  static CENTER_SQUARE = 5
+
   static joinOr(choices, deliminator = ', ', lastWord = 'or') {
     if (choices.length === 1) {
       return choices[0];
@@ -145,17 +157,54 @@ class TTTGame {
 
   play() {
     this.displayWelcomeMessage();
-
-    while (true) {
-      this.playOneGame();
-      if (!this.playAgain()) break;
-
-      console.log("Let's play again!");
-    }
-
+    this.playMatch();
     this.displayGoodbyeMessage();
   }
 
+  playMatch() {
+    console.log(`First player to win ${TTTGame.MATCH_GOAL} games wins the match.`);
+
+    while (true) {
+      this.playOneGame();
+      this.updateMatchScore();
+      this.displayMatchScore();
+
+      if (this.matchOver()) break;
+      if (!this.playAgain()) break;
+    }
+
+    this.displayMatchResults();
+  }
+
+  matchOver() {
+    return this.isMatchWinner(this.human) || this.isMatchWinner(this.computer);
+  }
+
+  isMatchWinner(player) {
+    return player.getScore() >= TTTGame.MATCH_GOAL;
+  }
+
+  updateMatchScore() {
+    if (this.isWinner(this.human)) {
+      this.human.incrementScore();
+    } else if (this.isWinner(this.computer)) {
+      this.computer.incrementScore();
+    }
+  }
+
+  displayMatchScore() {
+    let human = this.human.getScore();
+    let computer = this.computer.getScore();
+    console.log(`Current match score: [you: ${human}] [computer: ${computer}]`);
+  }
+
+  displayMatchResults() {
+    if (this.human.getScore() > this.computer.getScore()) {
+      console.log("You won this match! Congratulations!");
+    } else if (this.human.getScore() < this.computer.getScore()) {
+      console.log("Oh, boo hoo. You lost the match!");
+    }
+  }
   playOneGame() {
     this.board.reset();
     this.board.display();
@@ -248,7 +297,7 @@ class TTTGame {
   }
 
   pickCenterSquare() {
-    if (this.board.isUnusedSquare("5")) return "5";
+    if (this.board.isUnusedSquare(TTTGame.CENTER_SQUARE)) return TTTGame.CENTER_SQUARE.toString().toString();
     return null;
   }
 
