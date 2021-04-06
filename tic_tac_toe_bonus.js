@@ -29,6 +29,10 @@ class Square {
 
 class Board {
   constructor() {
+    this.reset();
+  }
+
+  reset() {
     this.squares = {};
     for (let counter = 1; counter <= 9; ++counter) {
       this.squares[counter] = new Square();
@@ -139,9 +143,20 @@ class TTTGame {
     //SPIKE
     this.displayWelcomeMessage();
 
+    while (true) {
+      this.playOneGame();
+      if (!this.playAgain()) break;
+
+      console.log("Let's play again!");
+    }
+
+    this.displayGoodbyeMessage();
+  }
+
+  playOneGame() {
+    this.board.reset();
     this.board.display();
     while (true) {
-
       this.humanMoves();
       if (this.gameOver()) break;
 
@@ -153,9 +168,23 @@ class TTTGame {
 
     this.board.displayWithClear();
     this.displayResults();
-    this.displayGoodbyeMessage();
   }
 
+  playAgain() {
+    let answer;
+
+      while (true) {
+      answer = readline.question("Play again (y/n)? ").toLowerCase();
+
+      if (["y", "n"].includes(answer)) break;
+
+      console.log("Sorry, that's not a valid chioce.");
+      console.log("");
+    }
+
+    console.clear();
+    return answer === "y";
+  }
   displayWelcomeMessage() {
     console.clear();
     console.log("Welcome to Tic Tac Toe!");
